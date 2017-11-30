@@ -15,70 +15,65 @@
 typedef struct node {
 	int exp;  //exponent
 	float coef; //coefficient
-	node* next; //point to next node
+	struct node* next; //point to next node
 }poly;
 
-poly* avail = NULL;
-poly* phead = NULL;
-poly* ptail = NULL;
+poly* avail = NULL; //available
+poly* phead = NULL; //head of polynomial
+poly* ptail = NULL; //tail of polynomial
 
 /*provide a node from avail to user*/
 poly* getNode(void)
 {
 	poly* node;
+	/*if avail isn't null*/
 	if (avail)
 	{
 		node = avail;
-		avail = avail->link;
+		avail = avail->next;
 		return node;
 	}
-	node = (poly*)malloc(sizeof(poly));
+	node = (poly*)malloc(sizeof(poly)); //allocate a space to node
 	return node;
 }
 
-/*return a node to avail*/
-void backNode(poly* node)
-{
-	node->next = avail;
-	avail = node;
-}
-
-/*read in element of polynomial*/
+/*read in element of polynomial ; recursive*/
 poly* pread(poly* pnow, int exp, float coef)
 {
-	if (pnow == NULL)
+	if (pnow == NULL) //first element
 	{
-		poly* tmp = getNode();
+		poly* tmp = getNode(); //require a space
 		tmp->exp = exp;
 		tmp->coef = coef;
-		tmp->next = tmp;
-		ptail = tmp;
+		tmp->next = tmp; //point to itself -> circular
+		ptail = tmp; //set the tail
 		return tmp;
 	}
-	if (pnow->exp == exp)
+	else if (pnow->exp == exp) //if the exp is existed, add the coefficient
 	{
 		pnow->coef += coef;
 		return pnow;
 	}
-	else if (pnow == ptail)
+	else if (pnow == ptail) //if point to the last one of polynomial now
 	{
-		if (pnow->exp > exp)
+		if (pnow->exp > exp) //the exp of insert element is smaller than the pointed one
 		{
 			poly* tmp = getNode();
 			tmp->exp = exp;
 			tmp->coef = coef;
 			pnow->next = tmp;
 			tmp->next = phead;
-			ptail = tmp;
+			ptail = tmp; //insert to the tail
 			return pnow;
 		}
+		//the exp of insert element is bigger than the pointed one
 		poly* tmp = getNode();
 		tmp->exp = exp;
 		tmp->coef = coef;
 		tmp->next = pnow;
 		return tmp;
 	}
-	else if (pnow->exp < exp)
+	else if (pnow->exp < exp) //the exp of insert element is bigger than the pointed one
 	{
 		poly* tmp = getNode();
 		tmp->exp = exp;
@@ -86,6 +81,7 @@ poly* pread(poly* pnow, int exp, float coef)
 		tmp->next = pnow;
 		return tmp;
 	}
+	/*the exp of insert element is smaller then the pointed one, so check the next one*/
 	pnow->next = pread(pnow->next, exp, coef);
 	return pnow;
 }
@@ -93,22 +89,70 @@ poly* pread(poly* pnow, int exp, float coef)
 /*write to element now in polynomial*/
 void pwrite(poly* pnow)
 {
-	printf("%f X ^ %d",pnow->coef,pnow->exp);
-	if (pnow == ptail)return;
+	if (pnow == NULL)return;
+	printf("%.3f X ^ %d",pnow->coef,pnow->exp);
+	if (pnow == ptail)
+	{
+		printf("\n\n");
+		return;
+	}
 	printf(" + ");
 	pwrite(pnow->next);
 	return;
 }
 
-int main()
+/*pread state*/
+void stateR(void)
 {
 	int exp;
 	float coef;
-	char state;
 	while (1)
 	{
-		printf("========================\n");
-		printf("= Please enter the state ")
-		scanf("%c", &state);
+		scanf("%d %f", &exp, &coef);
+		if (exp == -1 && coef == -1)break; //ending case
+		phead = pread(phead, exp, coef); //insert element
 	}
+	return;
+}
+
+int main()
+{
+	char state; //state
+	char c; //flush char
+	while (1)
+	{
+		/*state table*/
+		printf("==============================\n");
+		printf("= Please enter the state     =\n");
+		printf("= (r) read in each element   =\n");
+		printf("= (w) print out each element =\n");
+		printf("= (q) quit                   =\n");
+		printf("==============================\n");
+		scanf("%c", &state);
+		switch (state)
+		{
+		case 'r': //read in the element of polynimial
+			printf("=== pread ===\n");
+			printf("please enter the exponent and coefficient for each existed element in polynomial\n");
+			printf("format : exp+[space]+coef in a line\n");
+			printf("if you want to leave this state, please enter -1-1\n\n");
+			stateR();
+			c = getchar(); //remove '\n'
+			break;
+		case 'w': // print the polynomial
+			c = getchar(); //remove '\n'
+			printf("=== pwrite ===\n\n");
+			pwrite(phead);
+			break;
+		case 'q': //quit the function
+			c = getchar(); //remove '\n'
+			printf("=== quit ===\n");
+			exit(0);
+			break;
+		default:
+			break;
+		}
+		
+	}
+	return 0;
 }
