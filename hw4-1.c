@@ -109,7 +109,7 @@ void stateR(void)
 	while (1)
 	{
 		scanf("%d %f", &exp, &coef);
-		if (exp == -1 && coef == -1)break; //ending case
+		if (exp == 0 && coef == 0)break; //ending case : 00
 		phead = pread(phead, exp, coef); //insert element
 	}
 	return;
@@ -135,7 +135,7 @@ int main()
 			printf("=== pread ===\n");
 			printf("please enter the exponent and coefficient for each existed element in polynomial\n");
 			printf("format : exp+[space]+coef in a line\n");
-			printf("if you want to leave this state, please enter -1-1\n\n");
+			printf("if you want to leave this state, please enter 00\n\n");
 			stateR();
 			c = getchar(); //remove '\n'
 			break;
