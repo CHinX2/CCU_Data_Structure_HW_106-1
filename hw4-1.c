@@ -11,7 +11,6 @@
 //==============================
 #include <stdio.h>
 #include <stdlib.h>
-#define MAXAVAIL 20
 
 typedef struct node {
 	int exp;  //exponent
@@ -21,6 +20,7 @@ typedef struct node {
 
 poly* avail = NULL;
 poly* phead = NULL;
+poly* ptail = NULL;
 
 /*provide a node from avail to user*/
 poly* getNode(void)
@@ -46,8 +46,32 @@ void backNode(poly* node)
 /*read in element of polynomial*/
 poly* pread(poly* pnow, int exp, float coef)
 {
-	if (pnow == phead)
+	if (pnow == NULL)
 	{
+		poly* tmp = getNode();
+		tmp->exp = exp;
+		tmp->coef = coef;
+		tmp->next = tmp;
+		ptail = tmp;
+		return tmp;
+	}
+	if (pnow->exp == exp)
+	{
+		pnow->coef += coef;
+		return pnow;
+	}
+	else if (pnow == ptail)
+	{
+		if (pnow->exp > exp)
+		{
+			poly* tmp = getNode();
+			tmp->exp = exp;
+			tmp->coef = coef;
+			pnow->next = tmp;
+			tmp->next = phead;
+			ptail = tmp;
+			return pnow;
+		}
 		poly* tmp = getNode();
 		tmp->exp = exp;
 		tmp->coef = coef;
@@ -70,7 +94,7 @@ poly* pread(poly* pnow, int exp, float coef)
 void pwrite(poly* pnow)
 {
 	printf("%f X ^ %d",pnow->coef,pnow->exp);
-	if (pnow->next == phead)return;
+	if (pnow == ptail)return;
 	printf(" + ");
 	pwrite(pnow->next);
 	return;
@@ -78,8 +102,13 @@ void pwrite(poly* pnow)
 
 int main()
 {
-	avail = initAvail(avail);
-	phead = (poly*)malloc(sixeof(poly));
-	phead->next = phead;
-
+	int exp;
+	float coef;
+	char state;
+	while (1)
+	{
+		printf("========================\n");
+		printf("= Please enter the state ")
+		scanf("%c", &state);
+	}
 }
