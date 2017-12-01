@@ -11,10 +11,14 @@
 typedef struct node {
 	int exp;  //exponent
 	float coef; //coefficient
+	int tail; //check if it is tail
 	struct node* next; //point to next node
 }poly;
 
 poly* avail = NULL; //available a
+poly* headA = NULL; //head of polynomial a
+poly* headB = NULL; //head of polynomial b
+poly* headC = NULL; //head of polynomial c
 
 
 /*provide a node from avail to user*/
@@ -33,7 +37,7 @@ poly* getNode(void)
 }
 
 /*read in element of polynomial ; recursive*/
-poly* pread(poly* pnow, poly* ptail, int exp, float coef)
+poly* pread(poly* pnow, int exp, float coef)
 {
 	if (pnow == NULL) //first element
 	{
@@ -41,114 +45,109 @@ poly* pread(poly* pnow, poly* ptail, int exp, float coef)
 		tmp->exp = exp;
 		tmp->coef = coef;
 		tmp->next = tmp; //point to itself -> circular
-		ptail = (poly*)tmp; //set the tail
+		tmp->tail = 1; //set the tail
 		return tmp;
 	}
-	printf("%d\n", pnow->exp);
 	if (pnow->exp == exp) //if the exp is existed, add the coefficient
 	{
 		pnow->coef += coef;
 		return pnow;
 	}
-	else if (pnow == ptail) //if point to the last one of polynomial now
+	else if (pnow->tail == 1) //if point to the last one of polynomial now
 	{
-		printf("in1\n");
 		if (pnow->exp > exp) //the exp of insert element is smaller than the pointed one
 		{
-			printf("in1-1\n");
-
 			poly* tmp = getNode();
 			tmp->exp = exp;
 			tmp->coef = coef;
-			tmp->next = ptail->next; //linked to head
-
+			tmp->next = pnow->next; //linked to head
+			tmp->tail = 1; //set new tail
 			pnow->next = tmp;
-			*((poly**)ptail) = tmp; //insert to the tail
+			pnow->tail = 0; //it is not the tail
 
 			return pnow;
 		}
 		//the exp of insert element is bigger than the pointed one
-		printf("in1-2\n");
 		poly* tmp = getNode();
 		tmp->exp = exp;
 		tmp->coef = coef;
 		tmp->next = pnow;
+		tmp->tail = 0;
 		return tmp;
 	}
 	else if (pnow->exp < exp) //the exp of insert element is bigger than the pointed one
 	{
-		printf("in2\n");
 		poly* tmp = getNode();
 		tmp->exp = exp;
 		tmp->coef = coef;
 		tmp->next = pnow;
+		tmp->tail = 0;
 		return tmp;
 	}
 	/*the exp of insert element is smaller then the pointed one, so check the next one*/
-	pnow->next = pread(pnow->next, ptail, exp, coef);
+	pnow->next = pread(pnow->next, exp, coef);
 	return pnow;
 }
 
 /*write to element now in polynomial*/
-void pwrite(poly* pnow,poly* ptail)
+void pwrite(poly* pnow)
 {
 	if (pnow == NULL)return;
-	printf("%.3f X ^ %d",pnow->coef,pnow->exp);
-	if (pnow == ptail)
+
+	printf("%.3f X ^ %d", pnow->coef, pnow->exp);
+	if (pnow->tail == 1)
 	{
 		printf("\n\n");
 		return;
 	}
 	printf(" + ");
-	pwrite(pnow->next, ptail);
+	pwrite(pnow->next);
 	return;
 }
 
 /*pread state*/
-void stateR(poly* phead,poly* ptail)
+poly* stateR(poly* phead)
 {
 	int exp;
 	float coef;
 	while (1)
 	{
 		scanf("%d %f", &exp, &coef);
-		if (exp == 0 && coef == 0)break; //ending case : 00
-		phead = pread(phead, ptail, exp, coef); //insert element
+		if (exp == 0 && coef == 0)break; //ending case : 0 0
+		phead = pread(phead, exp, coef); //insert element
 	}
-	return;
+	return phead;
 }
 
-void pmult(poly* c, poly* ctail, poly* a, poly* b)
+/*multiple : c = a * b */
+poly* pmult(poly* a, poly* b)
 {
 	poly *nowA = a;
 	poly *nowB = b;
-	
+	poly* tmp = NULL; //point to the linklist of mult result
+
 	do {
-		float coef = nowA->coef;
-		int exp = nowA->exp;
 		nowB = b;
 		do {
-			coef *= nowB->coef;
-			exp += nowB->exp;
+			float coef = nowA->coef * nowB->coef;
+			int exp = nowA->exp + nowB->exp;
 
-			c = pread(c, ctail, exp, coef);
+			tmp = pread(tmp, exp, coef); //link the new element
 
+			if (nowB->tail == 1)break;
 			nowB = nowB->next;
-		} while (nowB != b);
-		nowA = nowA->next;
-	} while (nowA != a);
+		} while (nowB != NULL);
 
-	return;
+		if (nowA->tail == 1)break;
+		nowA = nowA->next;
+	} while (nowA != NULL);
+
+	return tmp; //return to c
 }
 
 int main()
 {
-	poly* headA = NULL; //head of polynomial a
-	poly* tailA = NULL; //tail of polynomial a
-	poly* headB = NULL; //head of polynomial b
-	poly* tailB = NULL; //tail of polynomial b
-	poly* headC = NULL; //head of polynomial c
-	poly* tailC = NULL; //tail of polynomial c
+
 	char state; //state
 	char c; //flush char
 	while (1)
@@ -169,15 +168,15 @@ int main()
 			printf("please enter the exponent and coefficient for each existed element in polynomial A\n");
 			printf("format : exp+[space]+coef in a line\n");
 			printf("if you want to leave this state, please enter 00\n\n");
-			stateR(headA, tailA);
+			headA = stateR(headA);
 			c = getchar(); //remove '\n'
 			break;
 		case 'b': //read in the element of polynimial b
 			printf("=== pread b ===\n");
 			printf("please enter the exponent and coefficient for each existed element in polynomial B\n");
 			printf("format : exp+[space]+coef in a line\n");
-			printf("if you want to leave this state, please enter 00\n\n");
-			stateR(headB, tailB);
+			printf("if you want to leave this state, please enter 0 0\n\n");
+			headB = stateR(headB);
 			c = getchar(); //remove '\n'
 			break;
 		case 'w': // print the polynomial
@@ -186,14 +185,15 @@ int main()
 
 			/*print polynomial a and b*/
 			printf("A : ");
-			pwrite(headA, tailA);
+			pwrite(headA);
 			printf("B : ");
-			pwrite(headB, tailB);
+			pwrite(headB);
 
-			pmult(headC, tailC, headA, headB); // c = a * b
+			headC = pmult(headA, headB); // c = a * b
 			/*print polynomial c*/
 			printf("C : ");
-			pwrite(headC, tailC);
+			pwrite(headC);
+			free(headC);
 			break;
 		case 'q': //quit the function
 			c = getchar(); //remove '\n'
@@ -203,7 +203,7 @@ int main()
 		default:
 			break;
 		}
-		
+
 	}
 	return 0;
 }
