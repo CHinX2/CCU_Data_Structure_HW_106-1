@@ -1,5 +1,5 @@
 //==============================
-// Homework 4 - 1
+// Homework 4 - 1 - 2
 //==============================
 // use circular linklist to store polynomial
 // use available space list to erase polynimial efficiently
