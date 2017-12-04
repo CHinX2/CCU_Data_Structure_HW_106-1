@@ -4,7 +4,7 @@
 // pmult() : c = a * b
 // pwrite() : enter value of X, print C(X)
 //==============================
-// belongs to CHinX2@20171130
+// belongs to CHinX2@20171202
 //==============================
 #include <stdio.h>
 #include <stdlib.h>
