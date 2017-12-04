@@ -4,7 +4,7 @@
 // psub() : c = a - b
 // perase() : erase c's element to avail
 //==============================
-// belongs to CHinX2@20171130
+// belongs to CHinX2@20171202
 //==============================
 #include <stdio.h>
 #include <stdlib.h>
