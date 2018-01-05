@@ -79,6 +79,7 @@ void sollin()
         for (int i=0; i<nMax; ++i)
             if (dis[i] != 1e9)
             {
+                //printf("%d <-> %d : %d\n",edge[eIndex[i]].a,edge[eIndex[i]].b,edge[eIndex[i]].v);
                 /* store the distance value in answer */
                 ans[edge[eIndex[i]].a][edge[eIndex[i]].b]=edge[eIndex[i]].v;
                 ans[edge[eIndex[i]].b][edge[eIndex[i]].a]=edge[eIndex[i]].v;
@@ -96,25 +97,30 @@ int main()
     /* data input and store in struct edge[]*/
 	printf("Please enter the number of nodes (limit : 99) : \n");
 	scanf("%d", &nCnt); //max num of nodes
-	while (1)
+
+    printf("Please enter each values(an integer > 0) of the adjencity matrix\n");
+    printf("(if there is not edge between 2 nodes, please enter 0)\n");
+	for(a=0;a<nCnt;a++)
 	{
-		printf("Please enter 2 connected nodes' index(0 ~ %d) and the distance\n",nCnt-1);
-		printf("Sample format : a b distance");
-		printf("if you want to stop, please enter : 0 0 0\n");
-		scanf("%d%d%d", &a, &b, &value);
-		if (value == 0&&a==0&&b==0)
-			break;
-        edge[eCnt].a=a;
-        edge[eCnt].b=b;
-        edge[eCnt].v=value;
-        eCnt++;
+	    for(b=0;b<nCnt;b++)
+		{
+            scanf("%d", &value);
+            if(value!=0)
+            {
+                edge[eCnt].a=a;
+                edge[eCnt].b=b;
+                edge[eCnt].v=value;
+                eCnt++;
+            }
+		}
 	}
 	qsort(edge,eCnt,sizeof(edge[0]),cmp); //sort the edge by it value(small->big)
 
 	sollin(); //Sollin's algorithm
 
 	/* print the answer matrix */
-	int i, j;
+    int i, j;
+    printf("\n");
 	for (i = 0; i < nCnt; i++)
 	{
 		for (j = 0; j < nCnt; j++)
